@@ -1,0 +1,20 @@
+def scroll_to_bottom(driver):
+    # Récupérer la hauteur actuelle de la page
+    prev_height = driver.execute_script("return document.body.scrollHeight")
+
+    while True:
+        # Faire défiler jusqu'en bas de la page
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
+        # Attendre un délai plus long pour le chargement des nouveaux éléments
+        time.sleep(5)
+
+        # Récupérer la nouvelle hauteur de la page après le défilement
+        new_height = driver.execute_script("return document.body.scrollHeight")
+
+        # Vérifier si la hauteur de la page a changé
+        if new_height == prev_height:
+            break
+
+        # Mettre à jour la hauteur précédente
+        prev_height = new_height
