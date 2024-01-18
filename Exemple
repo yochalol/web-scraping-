@@ -44,7 +44,6 @@ for element in soup.findAll(attrs='exemple_classe'):
     if data:
         results.append(data.text)
 
-
 driver.quit()
 
 df = pd.DataFrame({'Texte': results})
