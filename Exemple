@@ -6,7 +6,7 @@ def scroll_to_bottom(driver):
         # Faire défiler jusqu'en bas de la page
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
-        # Attendre un délai plus long pour le chargement des nouveaux éléments
+        # Attendre un délai le chargement des nouveaux éléments
         time.sleep(5)
 
         # Récupérer la nouvelle hauteur de la page après le défilement
@@ -16,5 +16,38 @@ def scroll_to_bottom(driver):
         if new_height == prev_height:
             break
 
-        # Mettre à jour la hauteur précédente
         prev_height = new_height
+
+
+# Initialiser le navigateur
+driver = webdriver.Chrome()
+driver.get('site.com')
+
+time.sleep(2) 
+
+# Scroller
+scroll_to_bottom(driver)
+
+# Obtenir le code HTML de la page
+html = driver.page_source
+
+# Créer une liste pour stocker les résultats
+results = []
+
+# Parser le code HTML
+soup = BeautifulSoup(html, 'html.parser')
+
+# Trouver tous les éléments avec la classe 'exemple_classe'
+for element in soup.findAll(attrs='exemple_classe'):
+# Trouver l'élément qui correspond à la base: exemple_base
+    data = element.find('exemple_base')
+    if data:
+        results.append(data.text)
+
+
+driver.quit()
+
+df = pd.DataFrame({'Texte': results})
+
+# Enregistrer les résultats dans un fichier Excel
+df.to_excel('data.xlsx', index=False)
