@@ -1,0 +1,92 @@
+#Ce script est fourni uniquement à des fins éducatives et de démonstration pour illustrer les techniques de web scraping avec Selenium et BeautifulSoup. Il est crucial de comprendre que l'utilisation de ce script, ou de toute méthode similaire, pour scraper des données sur LinkedIn (ou tout autre site web) peut constituer une violation de leurs conditions d'utilisation et des lois sur la protection des données personnelles.
+
+#Points Clés à Noter :
+
+#Violation des Conditions d'Utilisation : LinkedIn interdit explicitement le scraping de son site. L'utilisation de ce script pour collecter des données sur LinkedIn peut entraîner des conséquences juridiques, y compris des poursuites.
+
+#Respect de la Vie Privée et Conformité Légale : Le scraping de données personnelles sans consentement est illégal dans de nombreuses juridictions, notamment sous le RGPD en Europe. Il est impératif de respecter la vie privée et les droits des individus.
+
+#Utilisation Responsable : Ce script est destiné à des fins d'apprentissage et ne doit pas être utilisé pour collecter des données de manière non éthique ou illégale. Chaque utilisateur est responsable de s'assurer que son utilisation du script est conforme à toutes les lois et réglementations applicables.
+
+#Alternatives Légales : Pour obtenir des données de manière éthique et légale, envisagez d'utiliser des API officielles, comme celle proposée par LinkedIn, qui fournissent un moyen autorisé d'accéder aux données.
+
+#En partageant ce script, nous ne soutenons ni n'encourageons le scraping illégal ou non éthique de sites web. Nous soulignons l'importance d'une utilisation responsable des compétences en programmation et de la conformité avec les lois sur la protection des données et la vie privée.
+
+# De plus : Il faut être conscient que la structure du site web ciblé (LinkedIn dans ce cas) peut changer, ce qui peut affecter la capacité du script à fonctionner correctement.
+
+import time
+import pandas as pd
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from bs4 import BeautifulSoup
+from itertools import zip_longest
+
+
+def scroll_to_bottom(driver):
+    prev_height = driver.execute_script("return document.body.scrollHeight")
+    while True:
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(2)
+        new_height = driver.execute_script("return document.body.scrollHeight")
+        if new_height == prev_height:
+            break
+        prev_height = new_height
+
+
+# Initialiser le navigateur
+driver = webdriver.Chrome()
+driver.get('https://www.linkedin.com/in/diane-lauwereins-2b34b9221/')
+
+# Attendre que la page se charge après la connexion
+time.sleep(2)
+
+# Faire défiler la page jusqu'à la fin
+scroll_to_bottom(driver)
+
+# Obtenir le code HTML de la page
+html = driver.page_source
+
+# Parser le code HTML avec BeautifulSoup
+soup = BeautifulSoup(html, 'html.parser')
+
+# Créer des listes pour stocker les résultats
+text_results = []
+date_results = []
+reaction_results = []
+
+# Trouver tous les éléments avec la classe 'update-components-text relative feed-shared-update-v2__commentary'
+for element in soup.findAll(attrs='update-components-text relative feed-shared-update-v2__commentary'):
+    date = element.find('span')
+    text = element.get_text(strip=True, separator=' ')
+    text_results.append(text)
+
+# Trouver tous les éléments avec la classe 'update-components-text-view break-words'
+for element in soup.findAll(attrs='update-components-text-view break-words'):
+    date = element.find('span')
+    if date:
+        date_results.append(date.text)
+
+# Trouver tous les éléments avec la classe 'social-details-social-counts__reactions-count'
+for element in soup.findAll(attrs={'class': 'social-details-social-counts__reactions-count'}):
+    reactions = element.text.strip()
+    if reactions:
+        reaction_results.append(int(reactions))
+
+# Fermer le navigateur
+driver.quit()
+
+# Combinaison des listes avec zip_longest
+combined_results = zip_longest(text_results, date_results, reaction_results, fillvalue='')
+
+# Renommer les variables pour éviter les conflits
+text_column_name = 'Texte'
+date_column_name = 'Date'
+reaction_column_name = 'Nombre de réactions'
+
+# Créer un DataFrame pandas avec les résultats combinés et les noms de colonnes modifiés
+df = pd.DataFrame(combined_results, columns=[text_column_name, date_column_name, reaction_column_name])
+
+# Enregistrer les résultats dans un fichier Excel
+df.to_excel('Texte+date+reaction.xlsx', index=False)
