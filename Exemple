@@ -1,3 +1,9 @@
+Questions Techniques :
+
+Le script dépend de bibliothèques externes (Selenium, BeautifulSoup, pandas) qui doivent être installées pour que le script fonctionne.
+Navigateur Web et Pilote : Selenium nécessite un pilote pour le navigateur spécifique (comme ChromeDriver pour Google Chrome). 
+
+
 def scroll_to_bottom(driver):
     # Récupérer la hauteur actuelle de la page
     prev_height = driver.execute_script("return document.body.scrollHeight")
